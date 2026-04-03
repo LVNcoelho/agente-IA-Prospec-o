@@ -1,10 +1,8 @@
-from crewai import Agent, Task, Crew, Process
 import os
+from crewai import Agent, Task, Crew, Process
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-# Configurando o "Cérebro" Gratuito do Gemini
-os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
-
+# 1. Configurando o "Cérebro" (Gemini) - Ele usa a chave que você exportou no terminal
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
     verbose=True,
@@ -12,69 +10,55 @@ llm = ChatGoogleGenerativeAI(
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
-# 1. Definição do Agente de Inteligência de Mercado
+# 2. Definição do Agente de Inteligência de Mercado
 pesquisador_leads = Agent(
     role='Especialista em Prospecção Digital',
     goal='Identificar tendências de consumo e perfis de clientes interessados em {nicho} para a loja {nome_loja}',
-    backstory='Você é um expert em análise de dados sociais. Sua função é mapear o que o público local de {nome_loja} está buscando e quais são as dores e desejos atuais relacionados a {contexto_novidade}.',
+    backstory='Você é um expert em análise de dados sociais e tendências locais de São João da Ponta e região.',
     verbose=True,
-    allow_delegation=False
+    allow_delegation=False,
+    llm=llm  # <--- Avisando que deve usar o Gemini
 )
 
-# 2. Definição do Agente de Engajamento (Copywriter)
+# 3. Definição do Agente de Engajamento (Copywriter)
 copywriter_wa = Agent(
     role='Estrategista de WhatsApp Marketing',
-    goal='Criar fluxos de conversas e mensagens persuasivas para grupos de WhatsApp da {nome_loja}',
-    backstory='Você domina técnicas de Copywriting e Gatilhos Mentais (Escassez, Prova Social e Exclusividade). Seu objetivo é transformar a {contexto_novidade} em um evento imperdível, sem parecer spam.',
-    verbose=True
+    goal='Criar fluxos de conversas e mensagens persuasivas para os grupos da {nome_loja}',
+    backstory='Você domina gatilhos mentais e sabe como engajar clientes de forma humana e autêntica.',
+    verbose=True,
+    llm=llm  # <--- Avisando que deve usar o Gemini
 )
 
-# 3. Definição das Tarefas
+# 4. Definição das Tarefas
 tarefa_pesquisa = Task(
-    description=(
-        'Analise o nicho de {nicho} e identifique 3 comportamentos de compra atuais. '
-        'Foque em como a {contexto_novidade} se encaixa nesses comportamentos para atrair novos clientes.'
-    ),
+    description='Analise o nicho de {nicho} e como a {contexto_novidade} se encaixa nos desejos dos clientes.',
     agent=pesquisador_leads,
-    expected_output='Um relatório estratégico detalhando o público-alvo e os argumentos de venda baseados em tendências.'
+    expected_output='Um relatório estratégico detalhando o público-alvo e argumentos de venda.'
 )
 
 tarefa_disparo = Task(
-    description=(
-        'Com base no relatório de pesquisa, crie 3 mensagens prontas para WhatsApp: '
-        '1. Um Lembrete de "Vem aí" (Antecipação). '
-        '2. Um Lançamento oficial com foco na {contexto_novidade}. '
-        '3. Uma Promoção relâmpago para os membros do grupo. '
-        'Use emojis e quebras de linha para facilitar a leitura no celular.'
-    ),
+    description='Crie 3 modelos de mensagens para WhatsApp (Antecipação, Lançamento e Promoção) sobre a {contexto_novidade}.',
     agent=copywriter_wa,
-    expected_output='Os 3 modelos de mensagens estruturados e prontos para envio.'
+    expected_output='Os 3 modelos de mensagens prontos para envio.'
 )
 
-# 4. Configuração da Equipe (Crew)
+# 5. Configuração da Equipe (Crew)
 equipe_tracao = Crew(
     agents=[pesquisador_leads, copywriter_wa],
     tasks=[tarefa_pesquisa, tarefa_disparo],
-    process=Process.sequential, # Executa a pesquisa primeiro, depois o copy
+    process=Process.sequential,
     verbose=True
 )
 
-# 5. Execução com Cenário Realista
+# 6. Execução com Cenário Realista
 if __name__ == "__main__":
-    # Dados da simulação de "Novidades na Loja"
     inputs_da_campanha = {
         'nome_loja': 'Conecta TI & Crafts', 
-        'nicho': 'Artesanato sustentável e acessórios premium',
-        'contexto_novidade': 'Nova coleção de peças em Miriti e Acendedores Ecológicos "Buriti Brasa"'
+        'nicho': 'Artesanato em Miriti e Soluções Digitais',
+        'contexto_novidade': 'Nova coleção de peças em Miriti e acendedores ecológicos Buriti Brasa'
     }
 
-    print("\n" + "="*50)
-    print(f"🚀 INICIANDO AGENTE DE TRAÇÃO PARA: {inputs_da_campanha['nome_loja']}")
-    print("="*50 + "\n")
-
+    print("\n🚀 INICIANDO AGENTE DE TRAÇÃO COM GEMINI...\n")
     resultado = equipe_tracao.kickoff(inputs=inputs_da_campanha)
-
     print("\n" + "="*50)
-    print("✅ ESTRATÉGIA E MENSAGENS GERADAS COM SUCESSO:")
-    print("="*50)
     print(resultado)
