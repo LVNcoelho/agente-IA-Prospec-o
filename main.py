@@ -17,7 +17,7 @@ pesquisador_leads = Agent(
     backstory='Você é um expert em análise de dados sociais e tendências locais de Castanhal e região.',
     verbose=True,
     allow_delegation=False,
-    llm=llm"gemini/gemini-1.5-flash"
+    llm=llm
 )
 
 # 2. Definição do Agente de Engajamento (Copywriter)
