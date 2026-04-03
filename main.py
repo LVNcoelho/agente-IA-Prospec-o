@@ -2,7 +2,7 @@ import os
 from crewai import Agent, Task, Crew, Process
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-# 1. Configurando o "Cérebro" (Gemini) - Ele usa a chave que você exportou no terminal
+
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
     verbose=True,
@@ -10,17 +10,17 @@ llm = ChatGoogleGenerativeAI(
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
-# 2. Definição do Agente de Inteligência de Mercado
+# 1. Definição do Agente de Inteligência de Mercado
 pesquisador_leads = Agent(
     role='Especialista em Prospecção Digital',
     goal='Identificar tendências de consumo e perfis de clientes interessados em {nicho} para a loja {nome_loja}',
-    backstory='Você é um expert em análise de dados sociais e tendências locais de São João da Ponta e região.',
+    backstory='Você é um expert em análise de dados sociais e tendências locais de Castanhal e região.',
     verbose=True,
     allow_delegation=False,
-    llm=llm  # <--- Avisando que deve usar o Gemini
+    llm=llm"gemini/gemini-1.5-flash"
 )
 
-# 3. Definição do Agente de Engajamento (Copywriter)
+# 2. Definição do Agente de Engajamento (Copywriter)
 copywriter_wa = Agent(
     role='Estrategista de WhatsApp Marketing',
     goal='Criar fluxos de conversas e mensagens persuasivas para os grupos da {nome_loja}',
@@ -29,7 +29,7 @@ copywriter_wa = Agent(
     llm=llm  # <--- Avisando que deve usar o Gemini
 )
 
-# 4. Definição das Tarefas
+# 3. Definição das Tarefas
 tarefa_pesquisa = Task(
     description='Analise o nicho de {nicho} e como a {contexto_novidade} se encaixa nos desejos dos clientes.',
     agent=pesquisador_leads,
@@ -42,7 +42,7 @@ tarefa_disparo = Task(
     expected_output='Os 3 modelos de mensagens prontos para envio.'
 )
 
-# 5. Configuração da Equipe (Crew)
+# 4. Configuração da Equipe (Crew)
 equipe_tracao = Crew(
     agents=[pesquisador_leads, copywriter_wa],
     tasks=[tarefa_pesquisa, tarefa_disparo],
@@ -50,7 +50,7 @@ equipe_tracao = Crew(
     verbose=True
 )
 
-# 6. Execução com Cenário Realista
+# 5. Execução com Cenário Realista
 if __name__ == "__main__":
     inputs_da_campanha = {
         'nome_loja': 'Conecta TI & Crafts', 
