@@ -1,4 +1,16 @@
 from crewai import Agent, Task, Crew, Process
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+# Configurando o "Cérebro" Gratuito do Gemini
+os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",
+    verbose=True,
+    temperature=0.5,
+    google_api_key=os.getenv("GEMINI_API_KEY")
+)
 
 # 1. Definição do Agente de Inteligência de Mercado
 pesquisador_leads = Agent(
